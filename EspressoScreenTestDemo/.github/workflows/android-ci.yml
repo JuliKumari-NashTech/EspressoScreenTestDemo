@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # ✅ Allows manual trigger from GitHub UI
 
 jobs:
   androidTest:
@@ -30,9 +31,10 @@ jobs:
     - name: Create Emulator
       run: |
         sdkmanager "system-images;android-33;google_apis;x86_64"
-        avdmanager create avd -n test -k "system-images;android-33;google_apis;x86_64" --device "pixel_3a"
-        echo "no" | emulator -avd test -no-audio -no-window &
+        echo "no" | avdmanager create avd -n test -k "system-images;android-33;google_apis;x86_64" --device "pixel_3a"
+        emulator -avd test -no-audio -no-window -no-snapshot &
         adb wait-for-device
+        adb shell input keyevent 82  # Unlock screen
 
     - name: Run Espresso Tests
       run: ./gradlew connectedAndroidTest
