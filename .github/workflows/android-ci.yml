@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # ✅ Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   androidTest:
@@ -13,34 +13,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Setup JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      - name: Download Android SDK
-        uses: android-actions/setup-android@v2
+    - name: Download Android SDK
+      uses: android-actions/setup-android@v2
 
-      - name: Accept Licenses
-        run: yes | sdkmanager --licenses
+    - name: Accept Licenses
+      run: yes | sdkmanager --licenses
 
-      - name: Create Emulator
-        run: |
-          sdkmanager "system-images;android-33;google_apis;x86_64"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-33;google_apis;x86_64" --device "pixel_3a"
-          emulator -avd test -no-audio -no-window -no-snapshot &
-          adb wait-for-device
-          adb shell input keyevent 82  # Unlock screen
+    - name: Create Emulator
+      run: |
+        sdkmanager "system-images;android-33;google_apis;x86_64"
+        echo "no" | avdmanager create avd -n test -k "system-images;android-33;google_apis;x86_64" --device "pixel_3a"
+        emulator -avd test -no-audio -no-window -no-snapshot &
+        adb wait-for-device
+        adb shell input keyevent 82  # Unlock screen
 
-      - name: Run Espresso Tests
-        run: ./gradlew connectedAndroidTest
+    - name: Run Espresso Tests
+      run: ./gradlew connectedAndroidTest
 
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-report
-          path: app/build/reports/androidTests/connected/
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: app/build/reports/androidTests/connected/
